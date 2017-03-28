@@ -1,6 +1,7 @@
 logging:
-  level: debug
   file: logfile.log
+  level:
+    root: info
 
 server:
   port: 8090
