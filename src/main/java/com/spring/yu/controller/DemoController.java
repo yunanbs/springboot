@@ -2,6 +2,7 @@ package com.spring.yu.controller;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.spring.yu.comm.JwtUtils;
 import com.spring.yu.entity.User;
 import net.sf.json.JSONObject;
 import org.slf4j.Logger;
@@ -10,6 +11,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
 
@@ -18,7 +20,7 @@ import java.io.IOException;
  * Created by yunan on 2017/3/10.
  */
 @RestController
-@CrossOrigin(origins = "*",methods = {RequestMethod.OPTIONS,RequestMethod.POST,RequestMethod.GET})
+@CrossOrigin(origins = "*", methods = {RequestMethod.OPTIONS, RequestMethod.POST, RequestMethod.GET})
 public class DemoController
 {
     private final Logger logger = LoggerFactory.getLogger(DemoController.class);
@@ -32,36 +34,43 @@ public class DemoController
     /**
      * 测试方法 返回输入的json
      * 支持 key-value 或 json
+     *
      * @param req
      * @return
      */
-    @RequestMapping(path = "/hellobyname")
-    public JSONObject helloWorldbyname(HttpServletRequest req)
+    @RequestMapping(path = "/secret/hellobyname")
+    public JSONObject helloWorldbyname(HttpServletRequest req, HttpServletResponse res)
     {
         long st = System.currentTimeMillis();
-        String contenttype = req.getHeader("Content-Type");
         JSONObject result = null;
-        if (contenttype.equals("application/json"))
+        if (200 == res.getStatus())
         {
-            try
-            {
-                BufferedReader bufferedReader = req.getReader();
-                StringBuilder sb = new StringBuilder();
-                String line = bufferedReader.readLine();
-                while (line!=null){
-                    sb.append(line);
-                    line = bufferedReader.readLine();
-                }
-                result = JSONObject.fromObject(sb.toString());
+            String contenttype = req.getHeader("Content-Type");
 
-            } catch (Exception e)
+            if (contenttype.equals("application/json"))
             {
-                e.printStackTrace();
+                try
+                {
+                    BufferedReader bufferedReader = req.getReader();
+                    StringBuilder sb = new StringBuilder();
+                    String line = bufferedReader.readLine();
+                    while (line != null)
+                    {
+                        sb.append(line);
+                        line = bufferedReader.readLine();
+                    }
+                    result = JSONObject.fromObject(sb.toString());
+
+                } catch (Exception e)
+                {
+                    e.printStackTrace();
+                }
+            } else
+            {
+                result = JSONObject.fromObject(req.getParameter("user"));
             }
-        }else{
-            result = JSONObject.fromObject(req.getParameter("user"));
+            logger.info("finish hellobyname in {} ms", System.currentTimeMillis() - st);
         }
-        logger.info("finish hellobyname in {} ms",System.currentTimeMillis()-st);
         return result;
     }
 
@@ -83,9 +92,16 @@ public class DemoController
         return user;
     }
 
-    @RequestMapping("/hellobynameform")
+    @RequestMapping("/secret/hellobynameform")
     public String hellowworldbynameform(String user)
     {
         return user;
+    }
+
+    @RequestMapping("login")
+    public String login(@RequestBody String user) throws Exception{
+        JSONObject jsonObject = JSONObject.fromObject(user);
+        String jwtHeader=JwtUtils.createJWT(jsonObject.getString("id"),user,30*60*1000);
+        return  jwtHeader;
     }
 }

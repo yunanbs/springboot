@@ -42,7 +42,7 @@ public class DemoControllerTest
         user.setId(1L);
         params.put("user",user);
         String paramStr = params.toString();
-        mockMvc.perform(MockMvcRequestBuilders.post("/hellobyname")
+        mockMvc.perform(MockMvcRequestBuilders.post("/secret/hellobyname")
                 .content(paramStr)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk())

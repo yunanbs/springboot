@@ -11,7 +11,6 @@ import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.actuate.autoconfigure.ShellProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
@@ -81,11 +80,14 @@ public class UserRepositoryTest
         user.setUsername("yunan");
         String jwtString = JwtUtils.createJWT(String.valueOf(user.getId()), JwtUtils.generalSubject(user), 1000 * 60 * 30);
 
+        logger.info(jwtString);
+
         Claims claims = JwtUtils.parseJWT(jwtString);
         JSONObject jsonObject = new JSONObject(claims.getSubject());
         logger.info(claims.getIssuedAt().toString());
         logger.info(claims.getExpiration().toString());
         logger.info(jsonObject.toString());
+        logger.info(claims.getExpiration().toString());
         Assert.assertTrue(claims.getExpiration().getTime()-new Date().getTime()>0);
         logger.info("getJwtClaims use {} ms", System.currentTimeMillis() - st);
     }
